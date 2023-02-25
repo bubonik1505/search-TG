@@ -1,0 +1,32 @@
+import telegram
+import requests
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+# Create an instance of the Telegram Bot API using your bot token
+bot = telegram.Bot(token='YOUR_BOT_TOKEN')
+
+# Define a function that searches for information based on a keyword
+def search_info(update, context):
+    message_text = update.message.text.lower()
+    keyword = message_text.split(' ')[1]
+    # Make a request to the API to get the information
+    response = requests.get(f'https://your-api-url/search?q={keyword}')
+    if response.status_code == 200:
+        # Parse the information from the API response
+        information = response.json()
+        # Send a reply to the user with the information that was found
+        update.message.reply_text(f"Here is the information I found for '{keyword}': {information}")
+    else:
+        update.message.reply_text("Sorry, I couldn't find any information for that keyword.")
+
+# Define a handler function that listens for new messages and passes them to the search function
+def main():
+    updater = Updater(token='YOUR_BOT_TOKEN', use_context=True)
+    dispatcher = updater.dispatcher
+    search_handler = CommandHandler('search', search_info)
+    dispatcher.add_handler(search_handler)
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
